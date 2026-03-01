@@ -1,0 +1,99 @@
+{% extends "assets/base.html" %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'asset-list' %}" class="btn btn-secondary">&larr; Back to Asset List</a>
+</div>
+
+<h1>{{ asset.name }}</h1>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Asset Information</h5>
+        <table class="table">
+            <tr>
+                <th>Type</th>
+                <td>{{ asset.get_asset_type_display }}</td>
+            </tr>
+            <tr>
+                <th>Cost</th>
+                <td>${{ asset.cost }}</td>
+            </tr>
+            <tr>
+                <th>Assigned To</th>
+                <td>
+                    {% if asset.assigned_to %}
+                    {{ asset.assigned_to.username }}
+                    {% else %}
+                    <span class="text-danger">Unassigned</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Created</th>
+                <td>{{ asset.created_at|date:"M d, Y H:i" }}</td>
+            </tr>
+            <tr>
+                <th>Last Updated</th>
+                <td>{{ asset.updated_at|date:"M d, Y H:i" }}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!-- Maintenance History -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Maintenance History</h5>
+    </div>
+    <div class="card-body">
+        {% if maintenance_logs %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in maintenance_logs %}
+                <tr>
+                    <td>{{ log.service_date|date:"M d, Y" }}</td>
+                    <td>{{ log.description }}</td>
+                    <td>${{ log.cost }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted">No maintenance records found for this asset.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Maintenance Record Form -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Add Maintenance Record</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" action="{% url 'add-maintenance' asset.pk %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="id_service_date" class="form-label">Service Date</label>
+                {{ form.service_date }}
+            </div>
+            <div class="mb-3">
+                <label for="id_description" class="form-label">Description</label>
+                {{ form.description }}
+            </div>
+            <div class="mb-3">
+                <label for="id_cost" class="form-label">Cost ($)</label>
+                {{ form.cost }}
+            </div>
+            <button type="submit" class="btn btn-primary">Add Maintenance Record</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
